@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html ng-app='app'>
+
+  <head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script data-require="angular.js@1.2.10" data-semver="1.2.10" src="http://code.angularjs.org/1.2.10/angular.min.js"></script>
+    <script src="http://angular-ui.github.io/ui-router/release/angular-ui-router.min.js"></script>
+    <style>
+    a:hover{
+      cursor: default !important;
+      -webkit-user-select: none !important;
+    }
+    </style>
+  </head>
+
+  <body ng-controller='myCtrl'>
+    <tab active-tab='activated' link-list='list' fn='redirectTo(url)'></tab>
+    <div ui-view></div>
+    
+    <script type="text/javascript">
+    	var app=angular.module('app',['ui.router']);
+
+      app.config(function($stateProvider,$urlRouterProvider){
+        $urlRouterProvider.otherwise('one');
+        $stateProvider.state('one',{
+          url:'/one',
+          template:'one'
+        }).state('two',{
+          url:'/two',
+          template:'two'
+        }).state('three',{
+          url:'/three',
+          template:'three'
+        }).state('four',{
+          url:'/four',
+          template:'four'
+        }).state('five',{
+          url:'/five',
+          template:'five'
+        })
+      })
+      
+    	app.controller('myCtrl',function($scope,$state){
+    		$scope.list=[{title:'one',link:'one'},{title:'two',link:'two'},{title:'three',link:'three'},{title:'four',link:'four'},{title:'five',link:'five'}];
+        $scope.activated='one';
+        $scope.redirectTo=function(url){
+          $scope.activated=url;
+          $state.go(url);
+        }
+    	})
+      app.directive('tab',function(){
+        return{
+          restrict:'E',
+          scope:{
+            fn:'&',
+            linkList:'=',
+            activeTab:'='
+          },
+          template:'<ul class="nav nav-tabs"><li ng-repeat="item in linkList" ng-class="{\'active\':item.link==activeTab}"><a ng-click="fn({url:item.link})">{{item.title}}</a></li></ul>'
+        }
+      })
+		
+	</script>
+  </body>
+
+</html>
