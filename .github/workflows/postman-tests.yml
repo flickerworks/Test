@@ -14,40 +14,36 @@ jobs:
       NODE_ENV: ci
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm install
 
-      - name: Start server (background)
+      - name: Start server
         run: |
           echo "Starting server..."
-          nohup npm start > server.log 2>&1 &
+          nohup node server.js > server.log 2>&1 &
           sleep 5
 
-      - name: Show server log
+      - name: Print server log
         run: |
           echo "===== SERVER LOG ====="
           cat server.log || true
 
-      - name: Verify server is listening on 3000 (fail if not)
+      - name: Verify server is running (HARD FAIL)
         run: |
           echo "Checking port 3000..."
           if ! nc -z 127.0.0.1 3000; then
-            echo "❌ Server is NOT running on port 3000"
+            echo "❌ Server NOT running"
             echo "===== FINAL SERVER LOG ====="
             cat server.log || true
             exit 1
           fi
-          echo "✅ Server is running on port 3000"
+          echo "✅ Server is running"
 
-      - name: Smoke check API (login)
+      - name: Test API manually
         run: |
-          echo "===== CURL LOGIN TEST ====="
-          curl -i -X POST http://localhost:3000/api/auth/login \
-            -H "Content-Type: application/json" \
-            -d '{"username":"admin","password":"Admin@123"}' || true
+          curl -i http://localhost:3000 || true
 
       - name: Install Postman CLI
         run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
