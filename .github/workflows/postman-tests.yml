@@ -1,0 +1,4 @@
+run: |
+  newman run postman/collection.json \
+  --env-var "baseUrl=${{ secrets.BASE_URL }}" \
+  --env-var "token=${{ secrets.TOKEN }}"
