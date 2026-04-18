@@ -9,20 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm install
 
       - name: Start server
         run: |
-          npm start &
-          sleep 10
+          npm start > server.log 2>&1 &
+          sleep 5
+          cat server.log
+
+      - name: Install wait-on
+        run: npm install -g wait-on
+
+      - name: Wait for server
+        run: wait-on http://localhost:3000
 
       - name: Install Postman CLI
-        run: |
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+        run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
 
       - name: Login to Postman CLI
         run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
