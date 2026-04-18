@@ -1,5 +1,20 @@
 {
-    "scripts": {
-      "test:api": "newman run postman/collection.json -e postman/environment.json"
-    }
+  "name": "server",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "arpit",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "http-server": "^14.1.1",
+    "jsonwebtoken": "^9.0.3",
+    "training-sdk": "file:../../../../../Users/arpitchauhan/Downloads/training-sdk-typescript-1.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
 }
