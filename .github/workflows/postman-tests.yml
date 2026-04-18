@@ -14,8 +14,7 @@ jobs:
       NODE_ENV: ci
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm install
@@ -28,29 +27,19 @@ jobs:
 
       - name: Show server logs
         run: |
-          echo "---- SERVER LOG ----"
+          echo "==== SERVER LOG ===="
           cat server.log || true
 
-      - name: Check running processes
+      - name: Verify server is running (FAIL if not)
         run: |
-          echo "---- NODE PROCESSES ----"
-          ps aux | grep node || true
-
-      - name: Check port 3000
-        run: |
-          echo "---- PORT CHECK ----"
-          sudo lsof -i :3000 || true
-
-      - name: Install wait-on
-        run: npm install -g wait-on
-
-      - name: Wait for server
-        run: wait-on http://localhost:3000
-
-      - name: Test server manually
-        run: |
-          echo "---- CURL TEST ----"
-          curl http://localhost:3000 || true
+          echo "Checking if port 3000 is open..."
+          if ! nc -z localhost 3000; then
+            echo "❌ Server is NOT running on port 3000"
+            echo "==== FINAL SERVER LOG ===="
+            cat server.log || true
+            exit 1
+          fi
+          echo "✅ Server is running"
 
       - name: Install Postman CLI
         run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
