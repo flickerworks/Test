@@ -1,24 +1,38 @@
-- name: Install dependencies
-  run: npm install
-- name: Start server
-  run: |
-    npm start &
-    sleep 10   # wait for server to start
-
 name: Automated API tests using Postman CLI
 
-on: push
+on:
+  push:
+    branches: [ main ]
 
 jobs:
   automated-api-tests:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
-      - name: Install Postman CLI
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start server
         run: |
-          curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+          npm start > server.log 2>&1 &
+          sleep 5
+          cat server.log
+
+      - name: Install wait-on
+        run: npm install -g wait-on
+
+      - name: Wait for server
+        run: wait-on http://localhost:3000
+
+      - name: Install Postman CLI
+        run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
+
       - name: Login to Postman CLI
         run: postman login --with-api-key ${{ secrets.POSTMAN_API_KEY }}
+
       - name: Run API tests
         run: |
-          postman collection run "2238505-8bdef551-b2af-4b0f-8cff-5fa8ee50587b" -e "2238505-97e7de18-27ac-426f-899a-b2af4d6a0124"
+          postman collection run "2238505-8bdef551-b2af-4b0f-8cff-5fa8ee50587b" \
+          -e "2238505-97e7de18-27ac-426f-899a-b2af4d6a0124"
