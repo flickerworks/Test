@@ -16,9 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Show repo tree (sanity)
+        run: |
+          pwd
+          ls -la
+          ls -la . || true
+
       - name: Install dependencies
         run: npm install
 
+      # Start the server directly (avoid npm wrapper issues)
       - name: Start server
         run: |
           echo "Starting server..."
@@ -30,20 +37,23 @@ jobs:
           echo "===== SERVER LOG ====="
           cat server.log || true
 
-      - name: Verify server is running (HARD FAIL)
+      - name: Verify server is listening (FAIL if not)
         run: |
           echo "Checking port 3000..."
           if ! nc -z 127.0.0.1 3000; then
-            echo "❌ Server NOT running"
+            echo "❌ Server is NOT running on port 3000"
             echo "===== FINAL SERVER LOG ====="
             cat server.log || true
             exit 1
           fi
-          echo "✅ Server is running"
+          echo "✅ Server is running on port 3000"
 
-      - name: Test API manually
+      - name: Smoke test login (before Postman)
         run: |
-          curl -i http://localhost:3000 || true
+          echo "===== CURL LOGIN TEST ====="
+          curl -i -X POST http://localhost:3000/api/auth/login \
+            -H "Content-Type: application/json" \
+            -d '{"username":"admin","password":"Admin@123"}' || true
 
       - name: Install Postman CLI
         run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
