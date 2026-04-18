@@ -16,12 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Show repo tree (sanity)
-        run: |
-          pwd
-          ls -la
-          ls -la . || true
-
       - name: Install dependencies
         run: npm install
 
@@ -36,7 +30,6 @@ jobs:
           echo "Starting server..."
           nohup node server.js > server.log 2>&1 &
           server_pid=$!
-          echo "Server PID: $server_pid"
           trap 'echo "Killing server..."; kill $server_pid || true' EXIT
 
           echo "Waiting for server to become ready..."
@@ -51,19 +44,11 @@ jobs:
 
           if ! curl --silent --fail http://127.0.0.1:3000/health > /dev/null 2>&1; then
             echo "❌ Server did not start in time"
-            echo "===== FINAL SERVER LOG ====="
+            echo "===== SERVER LOG ====="
             cat server.log || true
             exit 1
           fi
 
-          echo "===== CURL LOGIN TEST ====="
-          curl -i -X POST http://localhost:3000/api/auth/login \
-            -H "Content-Type: application/json" \
-            -d '{"username":"admin","password":"Admin@123"}' || true
-
-          echo "===== SERVER LOG ====="
-          cat server.log || true
-
-          echo "===== RUN POSTMAN TESTS ====="
+          echo "Running Postman tests..."
           postman collection run "2238505-8bdef551-b2af-4b0f-8cff-5fa8ee50587b" \
             -e "2238505-97e7de18-27ac-426f-899a-b2af4d6a0124"
