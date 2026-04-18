@@ -2,29 +2,55 @@ name: Automated API tests using Postman CLI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   automated-api-tests:
     runs-on: ubuntu-latest
 
+    env:
+      PORT: 3000
+      NODE_ENV: ci
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         run: npm install
 
       - name: Start server
         run: |
-          npm start > server.log 2>&1 &
+          echo "Starting server..."
+          nohup npm start > server.log 2>&1 &
           sleep 5
-          cat server.log
+
+      - name: Show server logs
+        run: |
+          echo "---- SERVER LOG ----"
+          cat server.log || true
+
+      - name: Check running processes
+        run: |
+          echo "---- NODE PROCESSES ----"
+          ps aux | grep node || true
+
+      - name: Check port 3000
+        run: |
+          echo "---- PORT CHECK ----"
+          sudo lsof -i :3000 || true
 
       - name: Install wait-on
         run: npm install -g wait-on
 
       - name: Wait for server
         run: wait-on http://localhost:3000
+
+      - name: Test server manually
+        run: |
+          echo "---- CURL TEST ----"
+          curl http://localhost:3000 || true
 
       - name: Install Postman CLI
         run: curl -o- "https://dl-cli.pstmn.io/install/linux64.sh" | sh
