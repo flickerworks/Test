@@ -53,7 +53,12 @@ app.post('/api/auth/login', (req, res) => {
   return res.status(401).json({ message: 'Invalid credentials' });
 });
 
-// 📦 Get items (with filters)
+// � Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// �📦 Get items (with filters)
 app.get('/api/items', authenticateToken, (req, res) => {
   const { name, category, id } = req.query;
   let filteredItems = items;
